@@ -13,7 +13,8 @@ class CatchMindServer:
 
         self.scores = {}
         self.current_drawer_index = 0
-        self.words = ["apple", "banana", "car", "dog", "elephant"]
+        self.words = ["apple", "banana", "car", "dog", "elephant", "cat", "hat", "gorilla",
+                      "crocodile", "lion", "tiger", "wolf", "pig", "cow"]
         self.current_word = None
         self.max_score = 3
         self.game_over = False
