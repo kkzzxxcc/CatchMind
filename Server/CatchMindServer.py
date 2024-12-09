@@ -4,14 +4,14 @@ import random
 
 class CatchMindServer:
     def __init__(self, port=2600):
-        self.clients = []  # 연결된 클라이언트 소켓 리스트
-        self.client_names = {}  # 클라이언트 소켓과 사용자 이름 매핑
+        self.clients = []
+        self.client_names = {}
         self.s_sock = socket(AF_INET, SOCK_STREAM)
         self.s_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.s_sock.bind(('', port))
         self.s_sock.listen(5)
 
-        self.scores = {}  # 클라이언트 점수 관리
+        self.scores = {}
         self.current_drawer_index = 0
         self.words = ["apple", "banana", "car", "dog", "elephant"]
         self.current_word = None
