@@ -28,8 +28,9 @@ class CatchMindServer:
                 c_socket, (ip, port) = self.s_sock.accept()
                 try:
                     nickname = c_socket.recv(1024).decode('utf-8').strip().split("NICKNAME:")[1]
+
                 except (IndexError, UnicodeDecodeError):
-                    print(f"[DEBUG] 잘못된 닉네임 데이터를 수신했습니다. {ip}:{port}")
+                    print(f"잘못된 닉네임 데이터를 수신했습니다. {ip}:{port}")
                     c_socket.close()
                     continue
 
@@ -41,7 +42,6 @@ class CatchMindServer:
                 if len(self.clients) == 1:
                     self.start_new_round()
 
-                # 클라이언트 리스트 브로드캐스트
                 self.broadcast_client_list()
 
                 Thread(target=self.receive_messages, args=(c_socket, ip, port)).start()
@@ -66,7 +66,7 @@ class CatchMindServer:
                 drawer_name = self.client_names.get(drawer_socket, f"{ip}:{port}")
                 c_socket.sendall(f"NEW_ROUND:{drawer_name}님이 그림을 그리고 있습니다.\n".encode('utf-8'))
 
-        print(f"[DEBUG] 제시어 전달: {self.current_word} to {ip}:{port}")
+        print(f"제시어 전달: {self.current_word} to {ip}:{port}")
 
     def receive_messages(self, c_socket, ip, port):
         while True:
@@ -111,7 +111,7 @@ class CatchMindServer:
                         self.broadcast(message + "\n", c_socket)
 
             except Exception as e:
-                print(f"[DEBUG] 메시지 수신 오류 {ip}:{port}: {e}")
+                print(f"메시지 수신 오류 {ip}:{port}: {e}")
                 break
 
         self.disconnect_client(c_socket, ip, port)
@@ -122,7 +122,7 @@ class CatchMindServer:
                 try:
                     c_socket.sendall(message.encode('utf-8'))
                 except Exception as e:
-                    print(f"[DEBUG] 브로드캐스트 오류: {e}")
+                    print(f"브로드캐스트 오류: {e}")
                     self.disconnect_client(c_socket, None, None)
 
     def disconnect_client(self, c_socket, ip, port):
@@ -134,17 +134,17 @@ class CatchMindServer:
         try:
             c_socket.close()
         except Exception as e:
-            print(f"[DEBUG] 클라이언트 소켓 닫기 오류: {e}")
+            print(f"클라이언트 소켓 닫기 오류: {e}")
         print(f"클라이언트 연결 해제: {ip}:{port}")
 
     def broadcast_client_list(self):
         try:
             client_list = [f"{self.client_names[c]} 점수: {self.scores[c]}" for c in self.client_names]
             message = "CLIENT_LIST:" + ",".join(client_list) + "\n"
-            print(f"[DEBUG] Broadcasting client list: {message.strip()}")
+            print(f"Broadcasting client list: {message.strip()}")
             self.broadcast(message)
         except Exception as e:
-            print(f"[DEBUG] 클라이언트 리스트 브로드캐스트 오류: {e}")
+            print(f"클라이언트 리스트 브로드캐스트 오류: {e}")
 
     def shutdown_server(self):
         print("게임이 종료되었습니다. 서버를 종료합니다.")
@@ -153,7 +153,7 @@ class CatchMindServer:
             try:
                 c_socket.close()
             except Exception as e:
-                print(f"[DEBUG] 클라이언트 소켓 종료 오류: {e}")
+                print(f"클라이언트 소켓 종료 오류: {e}")
         self.clients.clear()
 
 if __name__ == "__main__":

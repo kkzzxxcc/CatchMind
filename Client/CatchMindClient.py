@@ -37,16 +37,17 @@ class CatchMindClient:
         try:
             self.initialize_socket(ip, 2600)
             self.user_name = name
-            # 사용자 이름 전송
+
             self.client_socket.sendall(f"NICKNAME:{name}\n".encode('utf-8'))
             self.setup_main_ui()
+
         except Exception as e:
             print(f"서버 연결 오류: {e}")
 
     def initialize_socket(self, ip, port):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
         self.client_socket.connect((ip, port))
-        print(f"Connected to server at {ip}:{port}")
+        print(f"서버에 연결되었습니다. {ip}:{port}")
 
     def setup_main_ui(self):
         for widget in self.root.winfo_children():
@@ -64,7 +65,7 @@ class CatchMindClient:
         canvas_frame = Frame(main_frame)
         canvas_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=10, pady=10)
 
-        # "그림판 지우기" 버튼 추가
+        # 그림판 지우기 버튼
         self.clear_button = Button(canvas_frame, text="그림판 지우기", command=self.request_clear_canvas, state=DISABLED)
         self.clear_button.pack(anchor=NW, pady=5)
 
@@ -75,7 +76,7 @@ class CatchMindClient:
         self.canvas.bind("<B1-Motion>", self.paint)
         self.canvas.bind("<Button-1>", self.start_paint)
 
-        # 우측 채팅 및 기타 정보 영역
+        # 채팅 영역
         chat_frame = Frame(main_frame)
         chat_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=10, pady=10)
 
@@ -126,12 +127,15 @@ class CatchMindClient:
                     print("서버와 연결이 끊어졌습니다.")
                     break
                 buffer += buf
+
                 while "\n" in buffer:
                     message, buffer = buffer.split("\n", 1)
                     self.process_message(message)
+
             except Exception as e:
                 print(f"서버 메시지 수신 오류: {e}")
                 break
+
         so.close()
 
     def request_clear_canvas(self):
@@ -148,12 +152,14 @@ class CatchMindClient:
             elif message.startswith("DRAW:"):
                 _, x1, y1, x2, y2 = message.split(":")
                 self.canvas.create_line(float(x1), float(y1), float(x2), float(y2), fill="black", width=2)
+
             elif message.startswith("CHAT:"):
                 chat_message = message.split(":", 1)[1]
                 self.chat_transcript_area.config(state='normal')
                 self.chat_transcript_area.insert(END, chat_message + '\n')
                 self.chat_transcript_area.config(state='disabled')
                 self.chat_transcript_area.yview(END)
+
             elif message.startswith("YOUR_TURN:"):
                 word = message.split(":", 1)[1]
                 self.chat_transcript_area.config(state='normal')
@@ -162,6 +168,7 @@ class CatchMindClient:
                 self.chat_transcript_area.yview(END)
                 self.can_draw = True
                 self.clear_button.config(state=NORMAL)
+
             elif message.startswith("NEW_ROUND:"):
                 round_info = message.split(":", 1)[1]
                 self.chat_transcript_area.config(state='normal')
@@ -170,6 +177,7 @@ class CatchMindClient:
                 self.chat_transcript_area.yview(END)
                 self.can_draw = False
                 self.clear_button.config(state=DISABLED)
+
             elif message.startswith("SCORE_UPDATE:"):
                 parts = message.split(":")
                 client_name = parts[1]
@@ -178,15 +186,17 @@ class CatchMindClient:
                 self.chat_transcript_area.insert(END, f"{client_name}님의 점수: {score}\n")
                 self.chat_transcript_area.config(state='disabled')
                 self.chat_transcript_area.yview(END)
+
             elif message.startswith("GAME_OVER:"):
                 self.chat_transcript_area.config(state='normal')
                 self.chat_transcript_area.insert(END, message + '\n')
                 self.chat_transcript_area.config(state='disabled')
                 self.chat_transcript_area.yview(END)
+
             elif message.startswith("CLIENT_LIST:"):
                 try:
                     clients = message.split(":", 1)[1].split(",")
-                    print(f"[DEBUG] Received client list: {clients}")  # 디버그 로그 추가
+                    print(f"Received client list: {clients}")
                     self.client_list_area.config(state='normal')
                     self.client_list_area.delete(1.0, END)  # 기존 리스트 삭제
                     for client_info in clients:
